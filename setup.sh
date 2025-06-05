@@ -49,16 +49,19 @@ if [[ "$CLEAN_SETUP" == true ]]; then
 fi
 
 backup_and_replace_lazy_lua() {
-  if [[ -f "$NVIM_CONFIG_DIR/lua/config/lazy.lua" && -f "./lua/config/lazy.lua" && ! "$(cmp -s ./lua/config/lazy.lua $NVIM_CONFIG_DIR/lua/config/lazy.lua)" ]]; then
-    mkdir -p ./backups
-    cp "$NVIM_CONFIG_DIR/lua/config/lazy.lua" ./backups/lazy.lua
-    echo "Backed up to ./backups/lazy.lua"
-  fi
-
-  cp ./lua/config/lazy.lua "$NVIM_CONFIG_DIR/lua/config/lazy.lua"
+	if [[ -f "$NVIM_CONFIG_DIR/lua/config/lazy.lua" && -f "./lua/config/lazy.lua" ]]; then
+		if ! cmp -s ./lua/config/lazy.lua "$NVIM_CONFIG_DIR/lua/config/lazy.lua"; then
+			mkdir -p ./backups
+			cp "$NVIM_CONFIG_DIR/lua/config/lazy.lua" ./backups/lazy.lua
+			echo "Backed up to ./backups/lazy.lua"
+		fi
+	fi
 }
 
 backup_and_replace_lazy_lua
 
 cp -r ./lua/plugins "$HOME/.config/nvim/lua/"
 
+read -rp "Enter commit message: " msg
+git -C "$NVIM_CONFIG_DIR" add .
+git -C "$NVIM_CONFIG_DIR" commit -m "$msg"
