@@ -24,8 +24,8 @@ return {
                     enable = true,
                     lookahead = true,
                     keymaps = {
-                        ["vaf"] = "@block.outer", -- Select around any block
-                        ["vif"] = "@block.inner", -- Select inside any block
+                        ["af"] = "@block.outer", -- Select around any block
+                        ["if"] = "@block.inner", -- Select inside any block
                     },
                 },
             },

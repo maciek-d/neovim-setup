@@ -48,7 +48,7 @@ if [[ "$CLEAN_SETUP" == true ]]; then
   backup_nvim_dirs
 fi
 
-cp -r ./lua/config "$NVIM_CONFIG_DIR/lua/" 
+cp -r ./lua/config "$NVIM_CONFIG_DIR/lua/"
 cp -r ./lua/plugins "$NVIM_CONFIG_DIR/lua/"
 
 read -rp "Enter commit message: " msg
