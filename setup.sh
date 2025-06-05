@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CLEAN_SETUP=true # Set to true to enable clean setup
+CLEAN_SETUP=false # Set to true to enable clean setup
 NVIM_CONFIG_DIR="$HOME/.config/nvim"
 
 backup_nvim_dirs() {
@@ -47,3 +47,18 @@ backup_nvim_dirs() {
 if [[ "$CLEAN_SETUP" == true ]]; then
   backup_nvim_dirs
 fi
+
+backup_and_replace_lazy_lua() {
+  if [[ -f "$NVIM_CONFIG_DIR/lua/config/lazy.lua" && -f "./lua/config/lazy.lua" && ! "$(cmp -s ./lua/config/lazy.lua $NVIM_CONFIG_DIR/lua/config/lazy.lua)" ]]; then
+    mkdir -p ./backups
+    cp "$NVIM_CONFIG_DIR/lua/config/lazy.lua" ./backups/lazy.lua
+    echo "Backed up to ./backups/lazy.lua"
+  fi
+
+  cp ./lua/config/lazy.lua "$NVIM_CONFIG_DIR/lua/config/lazy.lua"
+}
+
+backup_and_replace_lazy_lua
+
+cp -r ./lua/plugins "$HOME/.config/nvim/lua/"
+
