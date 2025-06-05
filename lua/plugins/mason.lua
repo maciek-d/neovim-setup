@@ -45,6 +45,7 @@ return {
                 }),
                 sources = {
                     { name = 'nvim_lsp' },
+                    { name = 'buffer' },
                 },
             })
 
@@ -52,7 +53,36 @@ return {
             lsp_zero.on_attach(function(_, bufnr)
                 local opts = { buffer = bufnr, remap = false }
 
-                vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
+                local telescope = require("telescope.builtin")
+
+                -- inside on_attach, replace the old gd line
+                vim.keymap.set('n', 'gd', function()
+                    local util = vim.lsp.util
+                    local client = vim.lsp.get_clients({ bufnr = 0 })[1]
+                    if not client then return end
+
+                    local enc = client.offset_encoding or 'utf-16'
+                    local params = util.make_position_params(0, enc)
+
+                    vim.lsp.buf_request(0, 'textDocument/definition', params, function(_, result)
+                        if not result or vim.tbl_isempty(result) then return end
+
+                        if #result == 1 then
+                            vim.lsp.buf.definition()
+                        else
+                            telescope.lsp_definitions({
+                                jump_type     = 'never',
+                                initial_mode  = 'normal',
+                                prompt_title  = '',
+                                prompt_prefix = 'Select Definition:>',
+                                layout_config = {
+                                    prompt_position = 'top',
+                                },
+                            })
+                        end
+                    end)
+                end, { noremap = true, silent = true, buffer = bufnr })
+
                 vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
                 vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
                 vim.keymap.set("n", "<leader>vws", vim.lsp.buf.workspace_symbol, opts)
@@ -75,7 +105,10 @@ return {
                 end, { noremap = true, silent = true, buffer = bufnr })
             end)
 
-            lsp_zero.setup()
+            local cmp_lsp = require("cmp_nvim_lsp")
+            lsp_zero.setup({
+                capabilities = cmp_lsp.default_capabilities(),
+            })
 
             vim.diagnostic.config({ virtual_text = true })
 
