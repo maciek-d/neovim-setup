@@ -1,26 +1,32 @@
 #!/bin/bash
 
-CLEAN_SETUP=false # Set to true to enable clean setup
 NVIM_CONFIG_DIR="$HOME/.config/nvim"
 
 check_neovim() {
+    if command -v nvim &>/dev/null &&
+        brew list --formula | grep -q '^neovim$' &&
+        ! brew outdated --formula | grep -q '^neovim$'; then
+        echo "Neovim is installed and up to date."
+        return
+    fi
+
     if ! command -v nvim &>/dev/null; then
-        read -rp "Neovim is not installed. Install it now? [y/N]: " confirm
+        read -rp "Neovim is not installed. Install it now with homebrew? [y/N]: " confirm
         if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
             echo "Neovim install skipped."
+            echo "Neovim is required for this script."
+            echo "Make sure neovim settings are located at $NVIM_CONFIG_DIR or update and rerun setup.sh"
             return
         fi
 
         pause "Installing Neovim..."
         brew install --head utf8proc
         brew install neovim
-    elif brew list --formula | grep -q '^neovim$'; then
-        read -rp "Neovim is already installed via Homebrew. Upgrade it? [y/N]: " confirm_upgrade
-        if [[ "$confirm_upgrade" == "y" || "$confirm_upgrade" == "Y" ]]; then
-            brew upgrade neovim
-        else
-            echo "Skipped Neovim upgrade."
-        fi
+    fi
+
+    if brew outdated --formula | grep -q '^neovim$'; then
+        read -rp "Neovim is outdated. Upgrade it? [y/N]: " confirm_upgrade
+        [[ "$confirm_upgrade" == [yY] ]] && brew upgrade neovim
     fi
 
     if command -v brew &>/dev/null; then
@@ -33,10 +39,12 @@ check_neovim() {
         brew doctor
     fi
 }
-
 check_neovim
 
 backup_nvim_dirs() {
+    read -rp "Do a clean Neovim setup (will backup existing)? [y/N]: " confirm_clean
+    [[ "$confirm_clean" != [yY] ]] && return
+
     dirs=(
         "$HOME/.config/nvim"
         "$HOME/.local/share/nvim"
@@ -77,9 +85,7 @@ backup_nvim_dirs() {
     git -C "$nvim_config_dir" commit -m "initial commit"
 }
 
-if [[ "$CLEAN_SETUP" == true ]]; then
-    backup_nvim_dirs
-fi
+backup_nvim_dirs
 
 cp -r ./lua/config "$NVIM_CONFIG_DIR/lua/"
 cp -r ./lua/plugins "$NVIM_CONFIG_DIR/lua/"
