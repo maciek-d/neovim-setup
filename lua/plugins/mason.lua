@@ -110,20 +110,14 @@ return {
                 capabilities = cmp_lsp.default_capabilities(),
             })
 
-
             vim.diagnostic.config({ virtual_text = true })
 
             -- diagnostic signs
-            vim.diagnostic.config({
-                signs = {
-                    text = {
-                        [vim.diagnostic.severity.ERROR] = "E",
-                        [vim.diagnostic.severity.WARN]  = "W",
-                        [vim.diagnostic.severity.INFO]  = "I",
-                        [vim.diagnostic.severity.HINT]  = "H",
-                    },
-                },
-            })
+            local signs = { Error = "E", Warn = "W", Hint = "H", Info = "I" }
+            for type, icon in pairs(signs) do
+                local hl = "DiagnosticSign" .. type
+                vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+            end
         end,
     },
 }

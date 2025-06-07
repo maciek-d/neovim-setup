@@ -50,7 +50,31 @@ fi
 
 cp -r ./lua/config "$NVIM_CONFIG_DIR/lua/"
 cp -r ./lua/plugins "$NVIM_CONFIG_DIR/lua/"
+cp .luarc.json "$NVIM_CONFIG_DIR/.luarc.json"
 
-read -rp "Enter commit message: " msg
-git -C "$NVIM_CONFIG_DIR" add .
-git -C "$NVIM_CONFIG_DIR" commit -m "$msg"
+setup_post_commit_hook() {
+  local setup_dir hook_file
+
+  setup_dir="$(cd "$(dirname "$0")" && pwd)"
+  hook_file="$NVIM_CONFIG_DIR/.git/hooks/post-commit"
+
+  cat > "$hook_file" <<EOF
+#!/bin/bash
+
+SETUP_DIR="$setup_dir"
+NVIM_DIR="\$HOME/.config/nvim"
+COMMIT_MSG=\$(git -C "\$NVIM_DIR" log -1 --pretty=%B)
+
+cp -r "\$NVIM_DIR/lua/plugins" "\$SETUP_DIR/lua/"
+cp -r "\$NVIM_DIR/lua/config" "\$SETUP_DIR/lua/"
+cp "\$NVIM_DIR/.luarc.json" "\$SETUP_DIR/.luarc.json"
+
+git -C "\$SETUP_DIR" add .
+git -C "\$SETUP_DIR" commit -m "\$COMMIT_MSG"
+EOF
+
+  chmod +x "$hook_file"
+  echo "Created post-commit hook to sync config back to setup directory."
+}
+
+setup_post_commit_hook
