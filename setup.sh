@@ -3,11 +3,25 @@
 NVIM_CONFIG_DIR="$HOME/.config/nvim"
 
 check_neovim() {
-    if command -v nvim &>/dev/null &&
-        brew list --formula | grep -q '^neovim$' &&
-        ! brew outdated --formula | grep -q '^neovim$'; then
-        echo "Neovim is installed and up to date."
-        return
+    if command -v nvim &>/dev/null; then
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            if brew list --formula | grep -q '^neovim$' &&
+                ! brew outdated --formula | grep -q '^neovim$'; then
+                echo "Neovim is installed and up to date (via Homebrew)."
+                return
+            fi
+        else # Novim manually installed on linux
+            echo "Neovim is installed. Version check skipped on non-macOS."
+            return
+        fi
+    fi
+
+    if [[ "$OSTYPE" != "darwin"* ]]; then
+        echo "Neovim is not installed."
+        echo "Please install Neovim manually using your package manager (e.g. apt, pacman, dnf)."
+        echo "Neovim is required for this script."
+        echo "Make sure Neovim settings are located at $NVIM_CONFIG_DIR or update and rerun setup.sh"
+        exit 1
     fi
 
     if ! command -v nvim &>/dev/null; then
