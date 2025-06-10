@@ -38,6 +38,15 @@ check_neovim() {
 
         brew doctor
     fi
+
+    read -rp "Delete .git folder and reinitialize Git for your own tracking? [y/N]: " confirm_git_reset
+    if [[ "$confirm_git_reset" == "y" || "$confirm_git_reset" == "Y" ]]; then
+        rm -rf .git
+        git init
+        git add .
+        git commit -m "initial commit"
+        echo "Reinitialized Git for personal tracking."
+    fi
 }
 check_neovim
 
