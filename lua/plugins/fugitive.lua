@@ -29,7 +29,7 @@ return {
                 -- needed if i did not set the branch up correctly
                 vim.keymap.set("n", "<leader>t", ":Git push -u origin ", opts)
 
-                -- inside the Fugitive status buffer
+                -- git diff
                 vim.keymap.set("n", "<leader>d", function()
                     local status_win = vim.api.nvim_get_current_win()
                     local status_buf = vim.api.nvim_win_get_buf(status_win)

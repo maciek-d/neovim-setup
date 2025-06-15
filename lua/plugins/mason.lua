@@ -55,7 +55,6 @@ return {
 
                 local telescope = require("telescope.builtin")
 
-                -- inside on_attach, replace the old gd line
                 vim.keymap.set('n', 'gd', function()
                     local util = vim.lsp.util
                     local client = vim.lsp.get_clients({ bufnr = 0 })[1]
@@ -83,6 +82,34 @@ return {
                     end)
                 end, { noremap = true, silent = true, buffer = bufnr })
 
+                vim.keymap.set('n', '<leader>vrr', function()
+                    local util = vim.lsp.util
+                    local client = vim.lsp.get_clients({ bufnr = 0 })[1]
+                    if not client then return end
+
+                    local enc = client.offset_encoding or 'utf-16'
+                    local params = util.make_position_params(0, enc)
+                    params.context = { includeDeclaration = true }
+
+                    vim.lsp.buf_request(0, 'textDocument/references', params, function(_, result)
+                        if not result or vim.tbl_isempty(result) then return end
+
+                        if #result == 1 then
+                            vim.lsp.util.jump_to_location(result[1], enc)
+                        else
+                            telescope.lsp_references({
+                                jump_type     = 'never',
+                                initial_mode  = 'normal',
+                                prompt_title  = '',
+                              prompt_prefix = 'Select Reference:>',
+                                layout_config = {
+                                    prompt_position = 'top',
+                                },
+                            })
+                        end
+                    end)
+                end, { noremap = true, silent = true, buffer = bufnr })
+
                 vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
                 vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
                 vim.keymap.set("n", "<leader>vws", vim.lsp.buf.workspace_symbol, opts)
@@ -90,7 +117,6 @@ return {
                 vim.keymap.set("n", "[d", vim.diagnostic.goto_next, opts)
                 vim.keymap.set("n", "]d", vim.diagnostic.goto_prev, opts)
                 vim.keymap.set("n", "<leader>vc", vim.lsp.buf.code_action, opts)
-                vim.keymap.set("n", "<leader>vrr", vim.lsp.buf.references, opts)
                 vim.keymap.set("n", "<leader>vrn", vim.lsp.buf.rename, opts)
                 vim.keymap.set("i", "<C-g>", vim.lsp.buf.signature_help, opts)
 
