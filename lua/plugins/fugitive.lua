@@ -13,11 +13,11 @@ return {
                 local bufnr = vim.api.nvim_get_current_buf()
                 local opts = { buffer = bufnr, remap = false }
                 -- diff
-                vim.keymap.set("n", "<leader>gi", function()
+                vim.keymap.set("n", "ga", function()
                     vim.cmd("Git add .")
                 end, { noremap = true, silent = true })
 
-                vim.keymap.set("n", "<leader>gu", function()
+                vim.keymap.set("n", "gu", function()
                     vim.cmd("silent !git reset")
                     vim.cmd("redraw!")
                 end, { noremap = true, silent = true })
