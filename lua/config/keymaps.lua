@@ -1,7 +1,7 @@
 vim.g.mapleader = " "
 
--- lf for list files. remapped from pv (dvorak)
-vim.keymap.set("n", "<leader>lf", vim.cmd.Ex)
+-- ls for list files. remapped from pv (dvorak)
+vim.keymap.set("n", "<leader>ls", vim.cmd.Ex)
 
 vim.keymap.set("v", "J", ":m '>+1<CR>gv=gv")
 vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
