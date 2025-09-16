@@ -17,6 +17,13 @@ return {
         model = "claude-sonnet-4-20250514",
       },
     },
+    windows = {
+      width = 70, -- percentage of the editor width
+      sidebar_header = {
+        align = "center",
+        rounded = true,
+      },
+    },
   },
   dependencies = {
     "nvim-lua/plenary.nvim",
@@ -49,7 +56,7 @@ return {
     },
     {
       -- Make sure to set this up properly if you have lazy=true
-      'MeanderingProgrammer/render-markdown.nvim',
+'MeanderingProgrammer/render-markdown.nvim',
       opts = {
         file_types = { "markdown", "Avante" },
       },
