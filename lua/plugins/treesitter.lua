@@ -10,6 +10,15 @@ return {
         require("nvim-treesitter.install").update({ with_sync = true })
     end,
     config = function()
+        require('treesitter-context').setup({
+            enable = true,
+            max_lines = 3,
+            multiline_threshold = 3,
+            trim_scope = 'outer',
+            mode = 'cursor',
+            separator = nil
+        })
+
         require 'nvim-treesitter.configs'.setup {
             -- A list of parser names, or "all"
             ensure_installed = { "vimdoc", "javascript", "typescript", "c", "lua", "rust", "php", "python" },
