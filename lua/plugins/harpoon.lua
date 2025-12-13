@@ -1,15 +1,19 @@
 return {
-  "theprimeagen/harpoon",
+  "ThePrimeagen/harpoon",
+  branch = "harpoon2",
   config = function()
-    local mark = require("harpoon.mark")
-    local ui = require("harpoon.ui")
+    local harpoon = require("harpoon")
 
-    vim.keymap.set("n", "<leader>a", mark.add_file)
-    vim.keymap.set("n", "<A-e>", ui.toggle_quick_menu)
-    vim.keymap.set("n", "<A-h>", function() ui.nav_file(1) end)
-    vim.keymap.set("n", "<A-j>", function() ui.nav_file(2) end)
-    vim.keymap.set("n", "<A-k>", function() ui.nav_file(3) end)
-    vim.keymap.set("n", "<A-l>", function() ui.nav_file(4) end)
+    harpoon:setup()
+
+    -- Keymaps
+    vim.keymap.set("n", "<leader>a", function() harpoon:list():add() end)
+    vim.keymap.set("n", "<A-e>", function() harpoon.ui:toggle_quick_menu(harpoon:list()) end)
+
+    vim.keymap.set("n", "<A-h>", function() harpoon:list():select(1) end)
+    vim.keymap.set("n", "<A-j>", function() harpoon:list():select(2) end)
+    vim.keymap.set("n", "<A-k>", function() harpoon:list():select(3) end)
+    vim.keymap.set("n", "<A-l>", function() harpoon:list():select(4) end)
   end,
 }
 
