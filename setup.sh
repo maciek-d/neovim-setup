@@ -10,7 +10,7 @@ check_neovim() {
                 echo "Neovim is installed and up to date (via Homebrew)."
                 return
             fi
-        else # Novim manually installed on linux
+        else # Neovim manually installed on linux
             echo "Neovim is installed. Version check skipped on non-macOS."
             return
         fi
@@ -33,7 +33,8 @@ check_neovim() {
             return
         fi
 
-        pause "Installing Neovim..."
+        printf 'Installing Neovim... Press Enter to continue...'
+        read -r
         brew install --head utf8proc
         brew install neovim
     fi
@@ -62,7 +63,34 @@ check_neovim() {
         echo "Reinitialized Git for personal tracking."
     fi
 }
+
 check_neovim
+
+install_dependencies() {
+    if [[ "$OSTYPE" == "darwin"* ]] && command -v brew &>/dev/null; then
+        if ! command -v tree-sitter &>/dev/null; then
+            echo "Installing tree-sitter CLI (required by nvim-treesitter)..."
+            brew install tree-sitter
+        fi
+        if ! command -v node &>/dev/null; then
+            echo "Installing node (required by mason LSP servers)..."
+            brew install node
+        fi
+    else
+        if ! command -v tree-sitter &>/dev/null; then
+            echo "Warning: 'tree-sitter' CLI not found. Install it via your package manager."
+            echo "  macOS: brew install tree-sitter"
+            echo "  Linux: cargo install tree-sitter-cli"
+        fi
+        if ! command -v node &>/dev/null; then
+            echo "Warning: 'node' not found. Install it via your package manager."
+            echo "  macOS: brew install node"
+            echo "  Linux: apt install nodejs npm / nvm install --lts"
+        fi
+    fi
+}
+
+install_dependencies
 
 backup_nvim_dirs() {
     read -rp "Do a clean Neovim setup (will backup existing)? [y/N]: " confirm_clean
@@ -102,17 +130,32 @@ backup_nvim_dirs() {
         fi
     done
 
-    rm -rf "$nvim_config_dir/.git"
-    git init "$nvim_config_dir"
-    git -C "$nvim_config_dir" add .
-    git -C "$nvim_config_dir" commit -m "initial commit"
+    mkdir -p "$NVIM_CONFIG_DIR"
+    mkdir -p "$NVIM_CONFIG_DIR/lua"
+
+    rm -rf "$NVIM_CONFIG_DIR/.git"
+    git init "$NVIM_CONFIG_DIR"
+    mkdir -p "$NVIM_CONFIG_DIR/.git/hooks"
 }
 
 backup_nvim_dirs
 
+mkdir -p "$NVIM_CONFIG_DIR"
+mkdir -p "$NVIM_CONFIG_DIR/lua"
+
+cp ./init.lua "$NVIM_CONFIG_DIR/init.lua"
 cp -r ./lua/config "$NVIM_CONFIG_DIR/lua/"
 cp -r ./lua/plugins "$NVIM_CONFIG_DIR/lua/"
 cp .luarc.json "$NVIM_CONFIG_DIR/.luarc.json"
+
+if [[ ! -d "$NVIM_CONFIG_DIR/.git" ]]; then
+    git init "$NVIM_CONFIG_DIR"
+fi
+
+mkdir -p "$NVIM_CONFIG_DIR/.git/hooks"
+
+git -C "$NVIM_CONFIG_DIR" add .
+git -C "$NVIM_CONFIG_DIR" commit -m "initial commit"
 
 setup_post_commit_hook() {
     local setup_dir hook_file
@@ -140,3 +183,5 @@ EOF
 }
 
 setup_post_commit_hook
+
+echo "Setup complete. Open nvim to install plugins."
