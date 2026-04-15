@@ -68,19 +68,21 @@ check_neovim
 
 install_dependencies() {
     if [[ "$OSTYPE" == "darwin"* ]] && command -v brew &>/dev/null; then
-        if ! command -v tree-sitter &>/dev/null; then
-            echo "Installing tree-sitter CLI (required by nvim-treesitter)..."
-            brew install tree-sitter
-        fi
         if ! command -v node &>/dev/null; then
             echo "Installing node (required by mason LSP servers)..."
             brew install node
         fi
+        if ! command -v tree-sitter &>/dev/null; then
+            echo "Installing tree-sitter CLI (required by nvim-treesitter to compile parsers)..."
+            # NOTE: 'brew install tree-sitter' only installs the C library, not the CLI binary.
+            # The CLI binary is installed via npm (downloads a prebuilt binary, no Rust needed).
+            npm install -g tree-sitter-cli
+        fi
     else
         if ! command -v tree-sitter &>/dev/null; then
             echo "Warning: 'tree-sitter' CLI not found. Install it via your package manager."
-            echo "  macOS: brew install tree-sitter"
-            echo "  Linux: cargo install tree-sitter-cli"
+            echo "  macOS/Linux with node: npm install -g tree-sitter-cli"
+            echo "  Linux with Rust: cargo install tree-sitter-cli"
         fi
         if ! command -v node &>/dev/null; then
             echo "Warning: 'node' not found. Install it via your package manager."
