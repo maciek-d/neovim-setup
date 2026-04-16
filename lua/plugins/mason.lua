@@ -132,7 +132,7 @@ return {
                 end, { noremap = true, silent = true, buffer = bufnr })
             end)
 
-            lsp_zero.configure('ruby_lsp', {
+            vim.lsp.config('ruby_lsp', {
                 init_options = {
                     formatter = 'rubocop',
                     linters = { 'rubocop' },
