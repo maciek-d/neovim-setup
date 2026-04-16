@@ -10,7 +10,7 @@ check_neovim() {
                 echo "Neovim is installed and up to date (via Homebrew)."
                 return
             fi
-        else # Neovim manually installed on linux
+        else
             echo "Neovim is installed. Version check skipped on non-macOS."
             return
         fi
@@ -18,9 +18,19 @@ check_neovim() {
 
     if [[ "$OSTYPE" != "darwin"* ]]; then
         echo "Neovim is not installed."
-        echo "Please install Neovim manually using your package manager (e.g. apt, pacman, dnf)."
-        echo "Neovim is required for this script."
-        echo "Make sure Neovim settings are located at $NVIM_CONFIG_DIR or update and rerun setup.sh"
+        if command -v apt &>/dev/null; then
+            echo "NOTE: 'apt install neovim' gives an outdated version. Recommended options:"
+            echo "  snap:  sudo snap install nvim --classic"
+            echo "  PPA:   sudo add-apt-repository ppa:neovim-ppa/unstable && sudo apt update && sudo apt install neovim"
+            read -rp "Install via snap now? [y/N]: " confirm_snap
+            if [[ "$confirm_snap" == [yY] ]]; then
+                sudo snap install nvim --classic
+                return
+            fi
+        else
+            echo "Please install Neovim via your package manager (pacman, dnf, etc.)"
+        fi
+        echo "Neovim is required. Install it and rerun setup.sh"
         exit 1
     fi
 
@@ -66,6 +76,12 @@ check_neovim() {
 
 check_neovim
 
+install_node_ubuntu() {
+    echo "Installing node via NodeSource (LTS)..."
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+}
+
 install_dependencies() {
     if [[ "$OSTYPE" == "darwin"* ]] && command -v brew &>/dev/null; then
         if ! command -v node &>/dev/null; then
@@ -78,28 +94,39 @@ install_dependencies() {
             # The CLI binary is installed via npm (downloads a prebuilt binary, no Rust needed).
             npm install -g tree-sitter-cli
         fi
-        if command -v gem &>/dev/null; then
-            if ! gem list rubocop -i &>/dev/null; then
-                echo "Installing rubocop gem (used by ruby-lsp for linting/formatting)..."
-                gem install rubocop
-            fi
+        if command -v gem &>/dev/null && ! gem list rubocop -i &>/dev/null; then
+            echo "Installing rubocop gem (used by ruby-lsp for linting/formatting)..."
+            gem install rubocop
+        fi
+    elif command -v apt &>/dev/null; then
+        if ! command -v node &>/dev/null; then
+            install_node_ubuntu
+        else
+            echo "node is already installed."
+        fi
+        if ! command -v tree-sitter &>/dev/null; then
+            echo "Installing tree-sitter CLI via npm..."
+            npm install -g tree-sitter-cli
+        fi
+        if command -v gem &>/dev/null && ! gem list rubocop -i &>/dev/null; then
+            echo "Installing rubocop gem..."
+            gem install rubocop
         fi
     else
-        if ! command -v tree-sitter &>/dev/null; then
-            echo "Warning: 'tree-sitter' CLI not found. Install it via your package manager."
-            echo "  macOS/Linux with node: npm install -g tree-sitter-cli"
-            echo "  Linux with Rust: cargo install tree-sitter-cli"
-        fi
+        # Other Linux (Arch, Fedora, etc.) — print instructions only
         if ! command -v node &>/dev/null; then
-            echo "Warning: 'node' not found. Install it via your package manager."
-            echo "  macOS: brew install node"
-            echo "  Linux: apt install nodejs npm / nvm install --lts"
+            echo "Warning: 'node' not found."
+            echo "  Arch:   sudo pacman -S nodejs npm"
+            echo "  Fedora: sudo dnf install nodejs"
+            echo "  Other:  https://nodejs.org"
         fi
-        if command -v gem &>/dev/null; then
-            if ! gem list rubocop -i &>/dev/null; then
-                echo "Warning: 'rubocop' gem not found. Install it for ruby-lsp linting:"
-                echo "  gem install rubocop"
-            fi
+        if ! command -v tree-sitter &>/dev/null; then
+            echo "Warning: 'tree-sitter' CLI not found."
+            echo "  With node: npm install -g tree-sitter-cli"
+            echo "  With Rust: cargo install tree-sitter-cli"
+        fi
+        if command -v gem &>/dev/null && ! gem list rubocop -i &>/dev/null; then
+            echo "Warning: 'rubocop' gem not found. Run: gem install rubocop"
         fi
     fi
 }
