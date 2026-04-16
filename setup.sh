@@ -78,6 +78,12 @@ install_dependencies() {
             # The CLI binary is installed via npm (downloads a prebuilt binary, no Rust needed).
             npm install -g tree-sitter-cli
         fi
+        if command -v gem &>/dev/null; then
+            if ! gem list rubocop -i &>/dev/null; then
+                echo "Installing rubocop gem (used by ruby-lsp for linting/formatting)..."
+                gem install rubocop
+            fi
+        fi
     else
         if ! command -v tree-sitter &>/dev/null; then
             echo "Warning: 'tree-sitter' CLI not found. Install it via your package manager."
@@ -88,6 +94,12 @@ install_dependencies() {
             echo "Warning: 'node' not found. Install it via your package manager."
             echo "  macOS: brew install node"
             echo "  Linux: apt install nodejs npm / nvm install --lts"
+        fi
+        if command -v gem &>/dev/null; then
+            if ! gem list rubocop -i &>/dev/null; then
+                echo "Warning: 'rubocop' gem not found. Install it for ruby-lsp linting:"
+                echo "  gem install rubocop"
+            fi
         fi
     fi
 }

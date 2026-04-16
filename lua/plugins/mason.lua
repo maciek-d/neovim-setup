@@ -16,6 +16,7 @@ return {
                     "pyright",
                     "bashls",
                     "yamlls",
+                    "ruby_lsp",
                 },
             })
         end,
@@ -130,6 +131,13 @@ return {
                     end
                 end, { noremap = true, silent = true, buffer = bufnr })
             end)
+
+            lsp_zero.configure('ruby_lsp', {
+                init_options = {
+                    formatter = 'rubocop',
+                    linters = { 'rubocop' },
+                },
+            })
 
             local cmp_lsp = require("cmp_nvim_lsp")
             lsp_zero.setup({
